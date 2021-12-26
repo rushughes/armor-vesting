@@ -1,9 +1,10 @@
-import logo from './logo.svg';
 import './App.css';
 
 import Web3 from "web3";
 import Web3Modal from "web3modal";
 import WalletConnectProvider from "@walletconnect/web3-provider";
+
+import Button from 'react-bootstrap/Button';
 
 const providerOptions = {
   walletconnect: {
@@ -34,6 +35,8 @@ function App() {
       if (!accounts) {
         accounts = await web3.eth.getAccounts();
         console.log(`Wallet address: ${accounts[0].toLowerCase()}`);
+        print(`Wallet address: ${accounts[0].toLowerCase()}`);
+
       }
     }
 
@@ -41,6 +44,12 @@ function App() {
       provider = await web3Modal.connect();
       return new Web3(provider);
     }
+
+    function print(str) {
+     const p = document.createElement("p");
+     p.innerText = str;
+     document.getElementById("userWalletAddress").appendChild(p);
+   }
 
 
   return (
@@ -51,6 +60,7 @@ function App() {
       <Button type="primary" onClick={() => showPortis()}>
           Connect
         </Button>
+        <pre id="userWalletAddress"></pre>
     </div>
   );
 }
