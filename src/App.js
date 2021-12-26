@@ -5,6 +5,8 @@ import Web3Modal from "web3modal";
 import WalletConnectProvider from "@walletconnect/web3-provider";
 
 import Button from 'react-bootstrap/Button';
+import Container from 'react-bootstrap/Container';
+import Form from 'react-bootstrap/Form';
 
 const providerOptions = {
   walletconnect: {
@@ -51,17 +53,37 @@ function App() {
      document.getElementById("userWalletAddress").appendChild(p);
    }
 
+   async function claim() {
 
-  return (
-    <div className="App">
-      <header className="App-header">
-        Ethereum Test
-      </header>
+   }
+
+   return (
+     <Container className="p-3">
+      <h1 className="header">Armor Vesting</h1>
       <Button type="primary" onClick={() => showPortis()}>
-          Connect
+        Connect
+      </Button>
+      <pre id="userWalletAddress"></pre>
+      <Form>
+        <Form.Group className="mb-3" controlId="formBasicEmail">
+          <Form.Label>Contract address</Form.Label>
+          <Form.Control type="email" placeholder="0x9b36C7c1C5ee9B44788D95b11DE3019f4c0c715e" />
+        </Form.Group>
+        <Button variant="primary" type="submit">
+          Scan
         </Button>
-        <pre id="userWalletAddress"></pre>
-    </div>
+      </Form>
+      <ul>
+        <li>ARMOR price (coingecko): $0.06</li>
+        <li>Wallet balance:  0.00</li>
+        <li>Claimable right now:  0.00</li>
+        <li>Claimable in future:  0.00</li>
+        <li>Vesting will end on January 23rd 2023</li>
+      </ul>
+      <Button type="primary" onClick={() => claim()}>
+        Claim
+      </Button>
+    </Container>
   );
 }
 
