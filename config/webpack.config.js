@@ -600,6 +600,9 @@ module.exports = function (webpackEnv) {
       new webpack.ProvidePlugin({
         Buffer: ['buffer', 'Buffer'],
       }),
+      new webpack.ProvidePlugin({
+        process: 'process/browser',
+      }),
       // Inlines the webpack runtime script. This script is too small to warrant
       // a network request.
       // https://github.com/facebook/create-react-app/issues/5358
