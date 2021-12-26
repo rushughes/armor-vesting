@@ -3,8 +3,6 @@ import './App.css';
 import React, { Component } from 'react';
 
 import vestingContract from './contracts/Vesting.json';
-import contract from 'truffle-contract'
-
 
 import Web3 from "web3";
 import Web3Modal from "web3modal";
@@ -16,18 +14,32 @@ import Form from 'react-bootstrap/Form';
 
 const providerOptions = {
   walletconnect: {
-    package: WalletConnectProvider, // required
+    package: WalletConnectProvider,
     options: {
-      infuraId: "9e4db1dc4a18481ba61bcac2ccdf0827" // required
+      infuraId: process.env.REACT_APP_INFURA_ID
     }
   }
 };
 
 let provider = null;
-let web3 = null;
 let accounts = null;
 
 class App extends Component {
+
+  constructor(props) {
+    super(props);
+    this.state = {
+      web3: null,
+      contractAddress: '0x9b36C7c1C5ee9B44788D95b11DE3019f4c0c715e',
+      contract: null,
+      account: null,
+      claimableAmount: null,
+      grantedToken: null,
+      releasable: null,
+      released: null,
+      starts: null,
+    }
+  }
 
   async showPortis() {
       if (!provider) {
@@ -35,15 +47,16 @@ class App extends Component {
           cacheProvider: true, // optional
           providerOptions // required
         });
-        web3 = await this.connect(web3Modal);
+        this.setState({ web3: await this.connect(web3Modal) });
       }
 
       //provider._portis.showPortis();
 
-      if (!accounts) {
-        accounts = await web3.eth.getAccounts();
-        console.log(`Wallet address: ${accounts[0].toLowerCase()}`);
-        this.print(`Wallet address: ${accounts[0].toLowerCase()}`);
+      if (!this.state.accounts) {
+        accounts = await this.state.web3.eth.getAccounts();
+        this.setState({ account: accounts[0] });
+        console.log(`Wallet address: ${this.state.account.toLowerCase()}`);
+        this.print(`Wallet address: ${this.state.account.toLowerCase()}`);
 
       }
     }
@@ -54,21 +67,36 @@ class App extends Component {
     }
 
   print(str) {
-     const p = document.createElement("p");
-     p.innerText = str;
-     document.getElementById("userWalletAddress").appendChild(p);
+     // const p = document.createElement("p");
+     // p.innerText = str;
+     // document.getElementById("userWalletAddress").appendChild(p);
    }
 
-   async scan() {
+  scan = async (event) => {
+     event.preventDefault();
      console.log('scan');
-     // this.contract = contract(vestingContract);
-     // this.contract.setProvider(provider);
-     // let contractInstance = await this.contract.deployed()
-     // console.log ('grantedToken' + contractInstance.grantedToken());
+     console.log(vestingContract);
+
+     const contract = new this.state.web3.eth.Contract(vestingContract, this.state.contractAddress);
+     const claimableAmount = await contract.methods.claimableAmount(this.state.account).call();
+     this.setState({ claimableAmount });
+
+     const grantedToken = await contract.methods.grantedToken(this.state.account).call();
+     this.setState({ grantedToken });
+
+     const releasable = await contract.methods.releasable(this.state.account).call();
+     this.setState({ releasable });
+
+     const released = await contract.methods.released(this.state.account).call();
+     this.setState({ released });
+
+     const starts = await contract.methods.starts(this.state.account).call();
+     this.setState({ starts });
    }
 
-   async claim() {
-
+   claim() {
+     const contract = new this.state.web3.eth.Contract(vestingContract, this.state.contractAddress);
+     contract.methods.claim().send({ from: this.state.account })
    }
 
    render() {
@@ -78,22 +106,23 @@ class App extends Component {
         <Button type="primary" onClick={() => this.showPortis()}>
           Connect
         </Button>
-        <pre id="userWalletAddress"></pre>
-        <Form>
+        <Form onSubmit={this.scan}>
           <Form.Group className="mb-3" controlId="formBasicEmail">
             <Form.Label>Contract address</Form.Label>
-            <Form.Control type="text" defaultValue="0x9b36C7c1C5ee9B44788D95b11DE3019f4c0c715e" />
+            <Form.Control type="text" defaultValue={this.state.contractAddress} name="contractAddress"/>
           </Form.Group>
-          <Button variant="primary" type="submit" onClick={() => this.scan()}>
+          <Button variant="primary" type="submit">
             Scan
           </Button>
         </Form>
         <ul>
-          <li>ARMOR price (coingecko): $0.06</li>
-          <li>Wallet balance:  0.00</li>
-          <li>Claimable right now:  0.00</li>
-          <li>Claimable in future:  0.00</li>
-          <li>Vesting will end on January 23rd 2023</li>
+          <li>Account: {this.state.account}</li>
+          <li>Contract Address: {this.state.contractAddress}</li>
+          <li>Claimable Amount: {this.state.claimableAmount}</li>
+          <li>Granted Token: {this.state.grantedToken}</li>
+          <li>Releasable: {this.state.releasable}</li>
+          <li>Released: {this.state.released}</li>
+          <li>Starts: {this.state.starts}</li>
         </ul>
         <Button type="primary" onClick={() => this.claim()}>
           Claim
